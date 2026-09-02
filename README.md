@@ -1,5 +1,8 @@
 # Alien Taxonomist Code
-Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
+Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). Try the demo [here](https://katiewarburton.com/Alien-Taxonomist/). 
+
+- De-identified data from the experiment and the code to analyze it can be found in the [Sequence-Effects-in-Hierarchical-Category-Systems](https://github.com/katie-warburton/Sequence-Effects-in-Hierarchical-Category-Systems) GitHub repo. 
+- The pre-registration can be found on [AsPredicted (#233, 910)](https://aspredicted.org/tbjh-r8pz.pdf).
 
 ## Running the Experiment
 The code here is used to run an experiment demo. The version used to collect data was integrated into the [CHDH LambdaExpt framework](https://github.com/complex-human-data-hub/LambdaExpt) so data could be collected and stored. This repository contains all the code required to run the experiment in full with the following modifications:
