@@ -1,9 +1,6 @@
 # Alien Taxonomist Code
 Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
 
-## Stimuli 
-Stimuli used can be found in static/stimuli. This repository includes all four sets used in the experiment plus the stimuli required to run the experiment tutorial. Other sets of stimuli can be substituted, but they must follow the same naming convention, "item (i).png", to work with the code. 
-
 ## Running the Experiment
 The code here is used to run an experiment demo. The version used to collect data was integrated into the CHDH [LambdaExpt framework](https://github.com/complex-human-data-hub/LambdaExpt) so data could be collected and stored. This repository contains all the code required to run the experiment in full with the following modifications:
 
@@ -16,4 +13,10 @@ The code here is used to run an experiment demo. The version used to collect dat
 - Modify the ``on_finish`` function in ``initJsPsych`` so that the experiment data is sent to the database/server where the experiment is hosted.
 - In the online version of the experiment, ``MAX_PRACTICE`` was set to 15, but data were still excluded if they took more than 3 attempts to answer the comprehension questions. To keep people from getting stuck in a long loop, I've set it to 3. 
 
-## Modifications
+## Stimuli 
+Stimuli used can be found in static/stimuli. This repository includes all four sets used in the experiment plus the stimuli required to run the experiment tutorial. Other sets of stimuli can be substituted, but they must follow the same naming convention, "item (i).png", to work with the code. 
+
+## Taxonomies
+These are javascript files that define the hierarchical trees structure in json format. 
+
+## Condition Details
