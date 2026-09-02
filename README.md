@@ -17,6 +17,6 @@ The code here is used to run an experiment demo. The version used to collect dat
 Stimuli used can be found in static/stimuli. This repository includes all four sets used in the experiment plus the stimuli required to run the experiment tutorial. Other sets of stimuli can be substituted, but they must follow the same naming convention, "item (i).png", to work with the code. 
 
 ## Taxonomies
-These are javascript files that define the hierarchical trees structure in json format. 
+These are javascript files that define the hierarchical tree structures in json format. 
 
 ## Condition Details
