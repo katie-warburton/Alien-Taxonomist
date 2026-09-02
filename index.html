@@ -205,22 +205,22 @@ HTML to run alien taxonomist experiment.  43
         };
         timeline.push(welcome_block);
 
-        // var plain_language_statement = {
-        //     type: jsPsychExternalHtml,
-        //     url: "static/html/plain-language-statement.html",
-        //     cont_btn: "next",
-        //     data: {'part': 'pls'}
-        // };
+        var plain_language_statement = {
+            type: jsPsychExternalHtml,
+            url: "static/html/plain-language-statement.html",
+            cont_btn: "next",
+            data: {'part': 'pls'}
+        };
         // timeline.push(plain_language_statement);
 
-        // var consent = {
-        //     type: jsPsychExternalHtml,
-        //     url: "static/html/consent.html",
-        //     cont_btn: "next",
-        //     check_fn: check_consent,
-        //     data: {'part': 'consent'},
-        //     execute_script: true
-        // };
+        var consent = {
+            type: jsPsychExternalHtml,
+            url: "static/html/consent.html",
+            cont_btn: "next",
+            check_fn: check_consent,
+            data: {'part': 'consent'},
+            execute_script: true
+        };
         // timeline.push(consent);
 
         var demo_consent = {
@@ -244,35 +244,35 @@ HTML to run alien taxonomist experiment.  43
             return `Invalid age (${input}), please input an integer between 1 and 120.`;
         };
 
-        // var demographics = {
-        //     type: jsPsychSurveyHtmlForm,
-        //     preamble: `
-        //         <div style="text-align: left; margin-top: 10vh;">
-        //         <h3>Participant Demographics</h3>
-        //         <p>Please answer the following questions.</p>
-        //         </div>
-        //     `,
-        //     html: `
-        //         <div style="text-align: left; border: 3px solid black; padding: 2%; margin-bottom: 2%;">
-        //         <label for="p_age">What is your age?</label><br>
-        //         <input id="p_age" name="age" type="number" min="1" max="120" step="1" placeholder="Age" required
-        //         oninvalid="this.setCustomValidity(error_message(this.value))"
-        //         oninput="this.setCustomValidity('')"><br><br>
+        var demographics = {
+            type: jsPsychSurveyHtmlForm,
+            preamble: `
+                <div style="text-align: left; margin-top: 10vh;">
+                <h3>Participant Demographics</h3>
+                <p>Please answer the following questions.</p>
+                </div>
+            `,
+            html: `
+                <div style="text-align: left; border: 3px solid black; padding: 2%; margin-bottom: 2%;">
+                <label for="p_age">What is your age?</label><br>
+                <input id="p_age" name="age" type="number" min="1" max="120" step="1" placeholder="Age" required
+                oninvalid="this.setCustomValidity(error_message(this.value))"
+                oninput="this.setCustomValidity('')"><br><br>
 
-        //         <label>What is your gender? <br>
-        //         <input type="radio" id="w" name="gender" value="woman" required> Woman<br>
-        //         <input type="radio" id="m" name="gender" value="man"> Man<br>
-        //         <input type="radio" id="nb" name="gender" value="nonbinary"> Nonbinary<br>
-        //         <input type="radio" id="sd" name="gender" value="self_describe"> Self-describe<br>
-        //         <input type="radio" id="na" name="gender" value="prefer_not"> Prefer not to say<br><br>
-        //         </label><br>
+                <label>What is your gender? <br>
+                <input type="radio" id="w" name="gender" value="woman" required> Woman<br>
+                <input type="radio" id="m" name="gender" value="man"> Man<br>
+                <input type="radio" id="nb" name="gender" value="nonbinary"> Nonbinary<br>
+                <input type="radio" id="sd" name="gender" value="self_describe"> Self-describe<br>
+                <input type="radio" id="na" name="gender" value="prefer_not"> Prefer not to say<br><br>
+                </label><br>
 
-        //         <label for="self_id">If you selected "Self-describe", please specify (optional):</label><br>
-        //         <input id="self_id" name="self_gender" type="text"><br><br>
-        //         </div>
-        //     `,
-        //     data: {'part': 'demographics'}
-        // };
+                <label for="self_id">If you selected "Self-describe", please specify (optional):</label><br>
+                <input id="self_id" name="self_gender" type="text"><br><br>
+                </div>
+            `,
+            data: {'part': 'demographics'}
+        };
         // timeline.push(demographics);
 
 
@@ -410,7 +410,7 @@ HTML to run alien taxonomist experiment.  43
         data: {'part': 'tutorial4-debrief'}
     }
 
-    const MAX_PRACTICE = 2;
+    const MAX_PRACTICE = 3;
     let practice_attempts = 1;
 
     var sanityCheck = {
@@ -570,6 +570,8 @@ HTML to run alien taxonomist experiment.  43
             }
         }
     };
+
+    // timeline.push(practice_loop);
 
     timeline.push(skip_practice_trial);
     timeline.push(practice_conditional_node);
