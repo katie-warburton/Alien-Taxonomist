@@ -2,7 +2,7 @@
 Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
 
 ## Running the Experiment
-The code here is used to run an experiment demo. The version used to collect data was integrated into the CHDH [LambdaExpt framework](https://github.com/complex-human-data-hub/LambdaExpt) so data could be collected and stored. This repository contains all the code required to run the experiment in full with the following modifications:
+The code here is used to run an experiment demo. The version used to collect data was integrated into the [CHDH LambdaExpt framework](https://github.com/complex-human-data-hub/LambdaExpt) so data could be collected and stored. This repository contains all the code required to run the experiment in full with the following modifications:
 
 #### To "experiment_setup.js"
 - Instead of generating a random number between 1 and 6 (see the first line of ``get_data``), use a queue of numbers repeating from 1 to 6 to ensure balanced distribution of the conditions across participants.
