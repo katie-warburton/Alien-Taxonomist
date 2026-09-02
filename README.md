@@ -1,7 +1,5 @@
 # Aline Taxonomist Code
-Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). 
-
-The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
+Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
 
 ## Stimuli 
 Stimuli used can be found in static/stimuli. This repository includes all four sets used in the experiment plus the stimuli required to run the experiment tutorial. Other sets of stimuli can be substituted, but they must follow the same naming convention, "item (i).png", to work with the code. 
