@@ -8,7 +8,7 @@ Stimuli used can be found in static/stimuli. This repository includes all four s
 The code here is used to run an experiment demo. The version used to collect data was integrated into the CHDH [LambdaExpt framework](https://github.com/complex-human-data-hub/LambdaExpt) so data could be collected and stored. This repository contains all the code required to run the experiment in full with the following modifications:
 
 #### To "experiment_setup.js"
-- Instead of generating a random number between 1 and 6 (see the first line of ``get_data()``), use a queue of numbers repeating from 1 to 6 to ensure balanced distribution of the conditions across participants.
+- Instead of generating a random number between 1 and 6 (see the first line of ``get_data``), use a queue of numbers repeating from 1 to 6 to ensure balanced distribution of the conditions across participants.
 
 #### To "index.html"
 - Uncomment ``timeline.push(demographics)``, ``timeline.push(plain_language_statement)``, and ``timeline.push(consent)``. Comment out ``timeline.push(demo_consent)``.
