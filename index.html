@@ -1,0 +1,586 @@
+<!-- 
+HTML to run alien taxonomist experiment.  43 
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alien Taxonomist (Demo)</title>
+
+    <!-- jsPsych -->
+    <script src="static/jsPsychCurrent/jspsych.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/plugin-html-keyboard-response.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/plugin-external-html.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/plugin-survey-multi-choice.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/plugin-preload.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/plugin-survey-html-form.js" type="text/javascript"></script>
+    <script src="static\jsPsychCurrent\plugin-fullscreen.js" type="text/javascript"></script>
+    <script src="static\jsPsychCurrent\plugin-html-button-response.js" type="text/javascript"></script>
+
+
+    <!-- Custom jsPsych plugins-->
+    <script src="static/jsPsychCurrent/adaptive-hierarchy.js" type="text/javascript"></script>
+    <script src="static/jsPsychCurrent/free-sort-hierarchy.js" type="text/javascript"></script>
+
+    <!-- Other js -->
+    <script src="static/js/d3.v6.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="static/js/experiment_setup.js"></script>
+
+
+    <!-- Style Sheets -->
+    <link rel="stylesheet" href="static/jsPsychCurrent/jspsych.css" type="text/css"></link>
+    <link rel="stylesheet" href="static/css/experiment.css" type="text/css"></link>
+
+    <!-- Taxonomies -->
+    <script src="static/taxonomies/tree2D.js"></script>
+    <script src="static/taxonomies/tree3D.js"></script>
+    <script src="static/taxonomies/tree2Dpractice.js"></script>
+    <script src="static/taxonomies/tree2Dpractice2.js"></script>
+    <script src="static/taxonomies/tree3Dpractice.js"></script>
+
+
+    <style>
+        html {
+            overflow-y: hidden;        
+        }
+        #jspsych-target {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="jspsych-target"></div>
+
+    <script>
+
+        var expt_data = get_data();
+        console.log(expt_data)
+
+        var STATIC_DIR = "static/";
+
+        const startTime = performance.now();
+
+        const jsPsych = initJsPsych({
+            timeline: timeline,
+            display_element: 'jspsych-target',
+            on_finish: function() {
+            var data_json = jsPsych.data.get().json(true);
+            document.body.innerHTML = `
+                <div style="max-width: 750px; margin: 40px auto; font-family: sans-serif; text-align: left;">
+                    <h3>Demo Completed</h3>
+                    <p>Below is the raw data generated during your run. It will disappear when you close or refresh this tab.</p>
+                    <textarea readonly style="width: 100%; height: 400px; font-family: monospace; font-size: 12px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; background-color: #f8f9fa; resize: vertical;">${data_json}</textarea>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="jspsych-btn" onclick="location.reload();">Restart Demo</button>
+                    </div>
+                </div>
+            `;
+        },
+        default_iti: 250
+        });
+
+        var check_consent = function(elem) {
+            if ($('#consent_checkbox').is(':checked')) {
+                return true;
+            } else {
+                alert("If you wish to continue you must check the box next to 'I understand'");
+                return false;
+            }
+        };
+
+        var get_tree = function(depth) {
+            if (depth == 2) {
+                return tree2D;
+            } else if (depth == 3) {
+                return tree3D;
+            }
+        };
+
+        var get_trials = function() {
+            let trials = [];
+            for (let i = 0; i < expt_data.trials.length; i++) {
+                var [depth, loc, ord] = expt_data.trials[i];
+                var path = `${STATIC_DIR}${expt_data.stimuli[i]}`; 
+                var code = `${depth}${loc}${ord}`;
+                let trial_items = expt_data.orders[code];
+                let min_height_gap = (depth === 3) ? 0.02 : 0.05;
+                let min_width_gap = (depth === 3) ? 0.01 : 0.015;
+
+                let first_prompt = (i === 0) ? "<p>Here is an alien taxonomy." : "<p>Here is a different alien taxonomy.";
+
+                if (ord === 'A') {
+                    first_prompt += "Your task is to add new aliens to the taxonomy. Categories that you can add aliens to will turn <span style='color:red;'><b><u>red</u></b></span> when you hover over them. If needed, you can create a new category by dragging an alien onto 'NEW CATEGORY'. Take a moment to review the taxonomy, then click 'Begin Categorizing' to start.</p>";
+                    var item_prompt = "<p>Here are the aliens! Drag each one to where you think it belongs in the taxonomy. You must place all aliens before you can click 'Finish'. If you're not happy with a placement, double-click the alien to return it to the item box and try again.</p>";
+
+                    var trial_data = {
+                        type: jsPsychFreeSortHierarchy,
+                        item_loc: path, 
+                        start_tree: get_tree(depth),
+                        depth: depth,
+                        title: `Alien Group ${expt_data.names[i]}`,
+                        min_height_gap: min_height_gap, 
+                        min_width_gap: min_width_gap,
+                        button_labels: ['Begin Categorizing', 'Finish'],
+                        prompts: [first_prompt, item_prompt],
+                        items: trial_items,
+                        data: {'part': 'experiment', 'condition': code, 'stimuli': expt_data.stimuli[i].split('/')[1], 'variant': 1}
+                    };
+                } else { 
+                    first_prompt += "Your task is to add new aliens to the taxonomy. Categories that you can add aliens to will turn <span style='color:red;'><b><u>red</u></b></span> when you hover over them. If needed, you can create a new category by clicking 'NEW CATEGORY'. Take a moment to review the taxonomy, then click 'Begin Categorizing' to start.</p>";
+                    let button_labels = ['Begin Categorizing'];
+                    for (let j = 0; j < trial_items.length - 1; j++) {
+                        button_labels.push('Next Alien');
+                    }
+                    button_labels.push('Finish');
+                    var first_item_prompt = "<p>Here is the first alien. Add it to the taxonomy. If you're not happy with the placement, you can move it. When you're satisfied, click 'Next Alien' to continue. <u>Remember</u>: once you click 'Next Alien', you cannot change its placement, so choose carefully!</p>";
+                    
+                    let ord_variant = (ord == 'M' && trial_items[0] < trial_items[2]) ? 2 : 1;
+                    
+                    var trial_data = {
+                        type: jsPsychAdaptiveHierarchy,
+                        item_loc: path,
+                        start_tree: get_tree(depth),
+                        depth: depth, 
+                        title: `Alien Group ${expt_data.names[i]}`,
+                        min_height_gap: min_height_gap, 
+                        min_width_gap: min_width_gap,
+                        prompts: [first_prompt, first_item_prompt],
+                        button_labels: button_labels,
+                        items: trial_items,
+                        data: {'part': 'experiment', 'condition': code, 'stimuli': expt_data.stimuli[i].split('/')[1], 'variant': ord_variant}
+                    };
+                }
+                trials.push(trial_data);
+
+                let between_prompt, key;
+                if (i + 1 < expt_data.trials.length) {
+                    between_prompt = `<div><p>You've finished categorizing alien group <i>${expt_data.names[i]}</i>. This is group ${i + 1} of 4.</p> <p>Press 'C' to continue to the next group.</p></div>`;
+                    key = ['c'];
+                } else {
+                    between_prompt = `<div><p>You've finished categorizing alien group <i>${expt_data.names[i]}</i>. That was the last group!</p> <p>Press 'F' to complete the experiment.</p></div>`;
+                    key = ['f'];
+                }
+
+                var between_screen = {
+                    type: jsPsychHtmlKeyboardResponse,
+                    stimulus: between_prompt,
+                    choices: key
+                };
+                trials.push(between_screen);
+            }
+            return trials;
+        };
+
+        /* Create timeline */
+        var timeline = [];
+
+        var preload = {
+            type: jsPsychPreload,
+            images: function() {
+                const sets = expt_data.stimuli;
+                let imgs = [];
+                sets.forEach(set => {
+                    for (let i = 1; i < 32; i++) {
+                        imgs.push(`${STATIC_DIR}${set}/item (${i}).png`);
+                    }
+                });
+                for (let i = 0; i < 23; i++) {
+                    imgs.push(`${STATIC_DIR}stimuli/Practice/item (${i}).png`);
+                }
+                return imgs;
+            },
+            data: {'part': 'preload'}
+        };
+        timeline.push(preload);
+2
+        var welcome_block = {
+            type: jsPsychHtmlKeyboardResponse,
+            stimulus: "<p style='font-size:25px'>Welcome to the experiment!</p> <p><b>Please do not close or reload your browser at any time during the experiment.</b><p>For the best experience, please maximize your browser and then avoid resizing it.</p></p><p>Press the 'B' key to begin.</p>",
+            on_start: function(trial) { $( "#jspsych-target" ).focus(); },
+            choices: ['b'],
+            data: {'part': 'welcome'}
+        };
+        timeline.push(welcome_block);
+
+        // var plain_language_statement = {
+        //     type: jsPsychExternalHtml,
+        //     url: "static/html/plain-language-statement.html",
+        //     cont_btn: "next",
+        //     data: {'part': 'pls'}
+        // };
+        // timeline.push(plain_language_statement);
+
+        // var consent = {
+        //     type: jsPsychExternalHtml,
+        //     url: "static/html/consent.html",
+        //     cont_btn: "next",
+        //     check_fn: check_consent,
+        //     data: {'part': 'consent'},
+        //     execute_script: true
+        // };
+        // timeline.push(consent);
+
+        var demo_consent = {
+            type: jsPsychExternalHtml,
+            url: "static/html/demo-info.html",
+            cont_btn: "next",
+            check_fn: check_consent,
+            data: {'part': 'consent'},
+            execute_script: true
+        };
+        timeline.push(demo_consent);
+
+        var instructions = {
+            type: jsPsychExternalHtml,
+            url: "static/html/instructions.html",
+            cont_btn: "read_instructions",
+            data: {'part': 'instructions'}
+        };
+
+        var error_message = function(input) {
+            return `Invalid age (${input}), please input an integer between 1 and 120.`;
+        };
+
+        // var demographics = {
+        //     type: jsPsychSurveyHtmlForm,
+        //     preamble: `
+        //         <div style="text-align: left; margin-top: 10vh;">
+        //         <h3>Participant Demographics</h3>
+        //         <p>Please answer the following questions.</p>
+        //         </div>
+        //     `,
+        //     html: `
+        //         <div style="text-align: left; border: 3px solid black; padding: 2%; margin-bottom: 2%;">
+        //         <label for="p_age">What is your age?</label><br>
+        //         <input id="p_age" name="age" type="number" min="1" max="120" step="1" placeholder="Age" required
+        //         oninvalid="this.setCustomValidity(error_message(this.value))"
+        //         oninput="this.setCustomValidity('')"><br><br>
+
+        //         <label>What is your gender? <br>
+        //         <input type="radio" id="w" name="gender" value="woman" required> Woman<br>
+        //         <input type="radio" id="m" name="gender" value="man"> Man<br>
+        //         <input type="radio" id="nb" name="gender" value="nonbinary"> Nonbinary<br>
+        //         <input type="radio" id="sd" name="gender" value="self_describe"> Self-describe<br>
+        //         <input type="radio" id="na" name="gender" value="prefer_not"> Prefer not to say<br><br>
+        //         </label><br>
+
+        //         <label for="self_id">If you selected "Self-describe", please specify (optional):</label><br>
+        //         <input id="self_id" name="self_gender" type="text"><br><br>
+        //         </div>
+        //     `,
+        //     data: {'part': 'demographics'}
+        // };
+        // timeline.push(demographics);
+
+
+    var tutorial_1 = {
+        type: jsPsychAdaptiveHierarchy,
+        item_loc: "static/stimuli/Practice",
+        start_tree: tree2Dpractice,
+        depth: 2,
+        title: 'Animal Kingdom Part 1',
+        prompts: [
+            "<p>Here is an example of a partially completed taxonomy with <u>two levels of categorization</u>. It shows part of the <i>Taxonomy of Living Things</i>. The top level includes a broad category (in this case, animals), while the bottom level shows two subcategories within it. Click 'Next' to continue</p>",
+
+            "<p>You can only add animals to categories at the <b>bottom</b> of this taxonomy. The borders of categories you can add to will turn <b><u style='color:red;'>red</u></b> when hovered over. To familiarize yourself with the setup, please hover over all the categories in the taxonomy. Notice which ones turn red. Once you are comfortable with the setup click 'Begin Categorizing'.</p>",
+
+            "<p>Here is a dog. <u>Click</u> on the category you want to add the dog to then click 'Next Animal'.</p>",
+
+            "<p>Now that you have clicked 'Next Animal', you cannot move the dog. Instead, you have a new animal to categorize. This is a sparrow. Please add it to the category it belongs to and click 'Next Animal'.</p>",
+
+            "<p>Here is a duck! Add it to the taxonomy and click 'Next Animal'. Notice that when you add it to a category at the bottom, it is also added to the top-level category (a.k.a. the parent category).</p>",
+
+            "<p>Finally, here is a kangaroo. This is the last animal you have to add. When you have added it to the taxonomy click 'Finish'.</p>"
+        ],
+        button_labels: ['Next', 'Begin Categorizing', 'Next Animal', 'Next Animal', 'Next Animal', 'Finish'],
+        items: [9, 1, 4, 10],
+        start_idx: -2,
+        data: {'part': 'tutorial1', 'condition': 'TUT1', 'stimuli': 'Practice'}
+    }
+
+    var tutorial_debrief_1 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div style='font-size: 20px; border: 3px solid black; padding-left: 2%; padding-right: 2%; padding-bottom: 1%; padding-top: 1%; margin-bottom: 2%;'><p>Congratulations! You've completed the first stage of the tutorial. All four animals should have been placed in the <u>same</u> category (on the left). So far, you've only seen examples of birds and mammals, but more types of animals are coming. As you continue the tutorial, remember: <b>your goal is to place each animal in the correct part of the taxonomy</b>, not to just create equal-sized categories. It's perfectly fine if one category ends up with more animals than another. Press the 'C' key to continue...</p></div>",
+        choices: ['c'],
+        data: {'part': 'tutorial1-debrief'}
+    }
+
+    var tutorial_2 = {
+        type: jsPsychAdaptiveHierarchy,
+        start_tree: tree2Dpractice2,
+        depth: 2,
+        title: 'Animal Kingdom Part 2',
+        button_labels: ['Begin Categorizing', 'Next Animal', 'Next Animal', 'Next Animal', 'Finish'],
+        prompts: [
+            "<p>This is the same taxonomy as before. You will now be shown additional animals to categorize so that you can become more familiar with the setup. Click 'Begin Categorizing' to start.</p>",
+
+            "<p>Here is a butterfly. <b>This animal does not fit into any of the existing categories in the taxonomy.</b> To include it, click <b>'NEW CATEGORY'</b>. Notice how a new category is created for the butterfly, then click 'Next Animal' to continue.</p>",
+
+            "<p>Here is a whale. <b>Before clicking 'Next Animal', try selecting both the left and right categories.</b> As long as you haven't clicked 'Next Animal', you can move the animal between any categories that turn <b><u style='color:red;'>red</u></b>. Only continue when you're satisfied with your placement.</p>",
+
+            "<p>Now here is a slug. Add it to one of the categories in the taxonomy and continue.</p>",
+
+            "<p>Here is another butterfly. Please add it to the taxonomy and then click 'Finish'.</p>",
+        ],
+
+        items: [14, 11, 22, 15],
+        item_loc: "static/stimuli/Practice",
+        data: {'part': 'tutorial2', 'condition': 'TUT2', 'stimuli': 'Practice'}
+    }
+
+    var tutorial_debrief_2 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div style='font-size: 20px; border: 3px solid black; padding-left: 2%; padding-right: 2%; padding-bottom: 1%; padding-top: 1%; margin-bottom: 2%;'><p>Great job! In this example, you created a new category for the butterflies. You will always have the option to create a new category, but only use it if the new item doesn't fit into any existing categories. You might have noticed that some categories you added animals to could be further subdivided. For example, the left category could be split into birds and mammals. In the next part of the tutorial, you'll see an animal taxonomy with <u>3 levels</u> and will be asked to add more animals. Press the 'N' key to continue...</p></div>",
+        choices: ['N'],
+        data: {'part': 'tutorial2-debrief'}
+    }
+
+    var tutorial_3 = {
+        type: jsPsychAdaptiveHierarchy,
+        start_tree: tree3Dpractice,
+        depth: 3, 
+        item_loc: "static/stimuli/Practice",
+        title: "Animal Kingdom Part 3",
+        items: [0, 19, 16, 12, 15, 6, 5, 13, 14],
+        min_height_gap: 0.02,
+        min_width_gap: 0.01,
+        prompts: [
+            "<p>Here is the animal taxonomy with <b>3 levels</b>. In this round, your task is to sort animals into subcategories at the third (bottom) level. Try hovering over the categories at the second and third levels to see which ones turn <b><u style='color:red;'>red</u></b>. Click 'Begin Categorizing' to start.</p>", 
+
+            "<p>Here is the first animal. When you add it to the taxonomy, notice how it is also added to all its connected parent categories.</p>",
+        
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+            
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Next Animal' when you are happy with its placement.</p>",
+
+            "<p>You will be shown several animals to add to the taxonomy. Click on the location you want to add the animal to (either an existing category or any place labeled 'NEW CATEGORY') and then click 'Finish' when you are happy with its placement.</p>",
+        ],
+
+        button_labels: ['Begin categorizing.', 'Next Animal', 'Next Animal', 'Next Animal', 'Next Animal', 'Next Animal', 'Next Animal', 'Next Animal', 'Next Animal', 'Finish'],
+        data: {'part': 'tutorial3', 'condition': 'TUT3', 'stimuli': 'Practice'}
+    }
+
+    let tutorial_debrief_3 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div style='font-size: 20px; border: 3px solid black; padding-left: 2%; padding-right: 2%; padding-bottom: 1%; padding-top: 1%; margin-bottom: 2%;'><p>That was great! Now we'll try something a little different. Before, you added animals one at a time. <b>This time, you'll see all the new animals at once and categorize them together.</b> After you click 'Begin Categorizing,' a box will appear at the top of the screen showing all the animals. Your job is to <u>drag</u> each animal to the category where you think it belongs. Let's practice! Press the 'B' key to begin...</p></div>",
+        choices: ['B'],
+        data: {'part': 'tutorial3-debrief'}
+    }
+
+    let tutorial_4 = {
+        type: jsPsychFreeSortHierarchy,
+        item_loc: "static/stimuli/Practice",
+        start_tree: tree3Dpractice,
+        depth: 3,
+        title: `Animal Taxonomy Part 4`,
+        min_height_gap: 0.02,
+        min_width_gap: 0.01,
+        start_idx: -2,
+        button_labels: ['Next', 'Begin Categorizing', 'Finish'],
+        prompts: [
+            "<p>Here is the same three-level animal taxonomy you saw earlier. Hover over all the <b>categories</b> and all the <b>'NEW CATEGORY'</b> areas to see which ones you can select. Like before, these spots will turn <b><u style='color:red;'>red</u></b> when available. You can add animals to existing categories or create new ones. Click 'Next' to continue.</p>",
+
+            "<p>In this round, you will categorize animals by <u>dragging and dropping</u> them into the areas that turn <b><u style='color:red;''>red</u></b>. If you're not happy with an animal's placement, <u>double-click</u> it to remove it and return it to the item box. Press 'Begin Categorizing' when you're ready to start. All animals to categorize will appear in a box above the taxonomy.</p>",
+
+            "<p>Here are all the animals. Try <u>dragging</u> one into a category, then <u>double-click</u> it to remove it. Next, drag an animal to an 'NEW CATEGORY' spot to see what happens. Practice a bit, then categorize all animals. You can't click 'Finish' until they are all placed.</p>"
+        ],
+        items: [0, 19, 16, 12, 15, 6, 5, 13, 14, 11, 10, 1],
+        data: {'part': 'tutorial4', 'condition': 'TUT4', 'stimuli': 'Practice'}
+
+    }
+
+    var tutorial_debrief_4 = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: "<div style='font-size: 20px; border: 3px solid black; padding-left: 2%; padding-right: 2%; padding-bottom: 1%; padding-top: 1%; margin-bottom: 2%;'><p>You've finished the tutorial! Going forward, instead of animals, you'll work with <b>alien taxonomies</b> that have 2 or 3 levels. Like before, you'll either add aliens to existing categories or create new ones if needed. Sometimes you'll add aliens one at a time; other times, all at once. Before starting, you'll answer some questions to check your understanding of the instructions. Press the 'Y' key to continue...</p></div>",
+        choices:['y'],
+        data: {'part': 'tutorial4-debrief'}
+    }
+
+    const MAX_PRACTICE = 2;
+    let practice_attempts = 1;
+
+    var sanityCheck = {
+        type: jsPsychSurveyMultiChoice,
+        questions: [
+            {
+                prompt: "I can add aliens to categories at the lowest level (bottom) of the taxonomy.",
+                name: 'q1',
+                options: jsPsych.randomization.shuffle(['True', 'False']),
+                required: true
+            },
+            {
+                prompt: "I can add all new aliens to the same category if I think its appropriate.",
+                name: 'q2',
+                options: jsPsych.randomization.shuffle(['True', 'False']),
+                required: true
+            },
+            {
+                prompt:"I can use 'NEW CATEGORY' to create a new category if I think its appropriate.",
+                name: 'q3',
+                options: jsPsych.randomization.shuffle(['True', 'False']),
+                required: true
+            },
+            {
+                prompt: "When you hover over a category that you can add aliens to, its border changes colour. What colour does its border change to?",
+                name: 'q4',
+                options: jsPsych.randomization.shuffle(['Green', 'Yellow', 'Red', 'Orange']),
+                required: true
+            },
+            {
+                prompt: "I must create a new category for every alien, even if an existing category fits.",
+                name: 'q5',
+                options: jsPsych.randomization.shuffle(['True', 'False']),
+                required: true
+            },
+            {
+                prompt:  "My main goal is to make sure all categories contain the same number of aliens.",
+                name: 'q6',
+                options: jsPsych.randomization.shuffle(['True', 'False']),
+                required: true
+            }
+        ],
+        randomize_question_order: true,
+        preamble: function() {
+            return `
+           <div>
+                <button type="button" id="toggle-btn" style="padding: 10px; margin: 10px; font-weight: bold;">
+                    Click to review task info
+                </button>
+                <div id="toggleable-content" style="display: none; background-color: #e3f2fd; padding: 15px; margin-top: 10px;">
+                    <h4>Task: Categorize the aliens.</h4>
+                    <p>Your main goal is to add aliens to the most appropriate part of the taxonomy. You can do so by placing them into existing categories at the bottom or choosing a 'NEW CATEGORY' option. Category borders and 'NEW CATEGORY' text will turn red when you hover over them. You may place all aliens in one category or spread them across multiple. Aim for the most accurate classification, regardless of category size.</p>
+                </div>
+            </div>
+            <h3 style="text-align: left;">UNDERSTANDING CHECK: Please answer the following questions. To proceed you must answer ALL questions correctly. Otherwise, you will be taken back to the start of the tutorial. This is attempt number ${practice_attempts}. </h3>`
+        },
+        button_label: 'Submit',
+        data: {'part': 'sanity-check'}, 
+        on_load: function() {
+            var toggleBtn = document.getElementById('toggle-btn');
+            var content = document.getElementById('toggleable-content');
+            var isVisible = false;
+            toggleBtn.style.fontWeight = 'bold';
+            toggleBtn.addEventListener('click', function() {
+                if (isVisible) {
+                    content.style.display = 'none';
+                    toggleBtn.textContent = 'Click to review task info';
+                    isVisible = false;
+                } else {
+                    content.style.display = 'block';
+                    toggleBtn.textContent = 'Click to hide task info';
+                    isVisible = true;
+                }
+            });
+        },   
+        on_finish: function(data) {
+            var answers = data.response;
+            if (answers.q1 === 'True' && answers.q2 === 'True' && answers.q3 === 'True' && answers.q4 === 'Red' && answers.q5 === 'False' && answers.q6 === 'False') {
+                data.pass = true;
+                data.num_correct = 6;
+            } else {
+                data.pass = false;
+                data.num_correct = Number(answers.q1 === 'True') + Number( answers.q2 === 'True') +  Number(answers.q3 === 'True') + Number(answers.q4 === 'Red') + Number(answers.q5 === 'False') + Number(answers.q6 === 'False');
+            }
+            data.attempts = practice_attempts;
+
+        }
+    }
+
+    var feedback = {
+        type: jsPsychHtmlKeyboardResponse,
+        stimulus: function(){
+            var pass_to_exp = jsPsych.data.get().last(1).values()[0].pass; 
+            var num_correct = jsPsych.data.get().last(1).values()[0].num_correct;
+            var html_str = `<h3> ${num_correct}/6 </h3>`;
+            if (pass_to_exp) {
+                return html_str +
+                 "<p style='font-size: 18px;'>All correct! Press the 'S' key to begin classifying aliens.</p>"
+            }else if (practice_attempts === MAX_PRACTICE) {
+                return html_str + 
+                `<p style='font-size: 18px;'> You have reached the maximum number of attempts (${MAX_PRACTICE}) to answer the questions. You will now be taken to the experiment. Press the 'S' key to begin classifying aliens.`
+
+            }else{
+                return  html_str +
+                "<p style='font-size: 18px;'> Some answers are incorrect. Press the 'R' key to return to return to the start of the instructions. <b>Please pay close attention to the information provided in the tutorial.</b></p>"
+            }
+        },
+        choices: function() {
+            var pass_to_exp = jsPsych.data.get().last(1).values()[0].pass; 
+            var num_correct = jsPsych.data.get().last(1).values()[0].num_correct;
+            if (pass_to_exp) {
+                return ['S']
+             } else if (practice_attempts === MAX_PRACTICE) {
+                 return ['S']
+            } else {
+                return ['R']
+            }
+
+        },
+        data: {'part': 'sanity-feedback'}
+    }
+
+    var skip_practice_trial = {
+        type: jsPsychHtmlButtonResponse,
+        stimulus: `
+            <div style="max-width: 600px; margin: 0 auto; font-family: sans-serif;">
+                <h3>Skip Tutorial?</h3>
+                <p>For the purposes of this demo you can choose to complete the tutorial or skip directly to the main alien categorization task. <b>Warning</b> if you skip the tutorial, you will also skip the initial task instructions.</p>
+            </div>
+        `,
+        choices: ['Start Practice', 'Skip to Main Task'],
+        data: { part: 'skip_practice_choice' }
+    };
+
+    var practice_loop = {
+        timeline: [instructions, tutorial_1, tutorial_debrief_1, tutorial_2, 
+        tutorial_debrief_2, tutorial_3, tutorial_debrief_3, tutorial_4, tutorial_debrief_4, sanityCheck, feedback],
+        loop_function: function(data) {
+            if (data.values()[9].pass === true || practice_attempts === MAX_PRACTICE) { 
+                return false; 
+            } else { 
+                practice_attempts++;
+                return true;
+           }
+        },
+        data: {'part': 'tutorial'},
+    }
+
+    var practice_conditional_node = {
+        timeline: [practice_loop],
+        conditional_function: function() {
+            var last_trial_data = jsPsych.data.get().filter({ part: 'skip_practice_choice' }).last(1).values()[0];
+            if (last_trial_data.response === 1) {
+                return false; 
+            } else {
+                return true;  
+            }
+        }
+    };
+
+    timeline.push(skip_practice_trial);
+    timeline.push(practice_conditional_node);
+
+    var experiment_body = {
+        timeline: get_trials()
+    }
+    timeline.push(experiment_body);
+
+    /* start the experiment */
+    jsPsych.run(timeline);	
+    </script>
+</body>
+</html>
