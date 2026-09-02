@@ -1,4 +1,4 @@
-# Aline Taxonomist Code
+# Alien Taxonomist Code
 Code to replicate the experiment used in [An Experimental Study of the Evolution of Hierarchical Category Systems](https://katiewarburton.com/resources/papers/anExperimental2026.pdf). The demo can be run [here](https://katiewarburton.com/Alien-Taxonomist/). 
 
 ## Stimuli 
