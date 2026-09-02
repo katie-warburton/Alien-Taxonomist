@@ -6,6 +6,7 @@ Stimuli used can be found in static/stimuli. This repository includes all four s
 
 ## Running the Experiment
 The code here is used to run an experiment demo. The version used to collect data was integrated  with Lambda Experiment so data could be collected and stored. Index.html contains all the code required to run the experiment in full with the following modifications:
+- Instead of generating a random number between 1 and 6 (see the first line of ``get_data()`` in "experiment_setup.js"), use a queue of numbers repeating from 1 to 6 to ensure balanced distribution of the conditions across participants. 
 - Uncomment ``timeline.push(demographics)``, ``timeline.push(plain_language_statement)``, and ``timeline.push(consent)``. Comment out ``timeline.push(demo_consent)``.
 - Uncomment ``timeline.push(practice_loop)``. Comment out ``timeline.push(skip_practice_trial)`` and ``timeline.push(practice_conditional_node)``.
 - Modify the ``on_finish`` function in ``initJsPsych`` so that the experiment data is sent to the database/server where the experiment is hosted.
